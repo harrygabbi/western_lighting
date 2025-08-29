@@ -18,8 +18,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const line_items = items.map((item) => ({
       price_data: {
-        currency: 'usd',
-        product_data: { name: item.name },
+        currency: 'cad',
+        product_data: {
+          name: item.name,
+          metadata: {
+            slug: item.slug, // 👈 used by webhook
+          }},
         unit_amount: item.price,
       },
       quantity: item.quantity,

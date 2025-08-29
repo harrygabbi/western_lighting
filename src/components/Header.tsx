@@ -3,12 +3,17 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Menu, X, Search, ShoppingCart } from 'lucide-react';
-import { useCart } from '@/context/CartContext'; 
+import { useCart } from '@/context/CartContext';
+import Image from 'next/image';
 
 export default function Header() {
   const { items } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const itemCount = items.reduce((sum, i) => sum + i.quantity, 0); 
+
+  // ✅ robust logo handling: try two paths, then text fallback
+  const [logoSrc, setLogoSrc] = useState('/mainLogo.jpeg');
+  const [logoError, setLogoError] = useState(false);
+  const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
   const links = [
     { name: 'Home', href: '/' },
@@ -23,13 +28,30 @@ export default function Header() {
     <header className="bg-white shadow-md relative z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
         {/* Logo */}
-        <Link href="/" className="text-xl font-bold text-red-600">
-          Western Lighting
+        <Link href="/" aria-label="Western Lighting home" className="flex items-center gap-2">
+          {!logoError ? (
+            <Image
+              src={logoSrc}
+              alt="Western Lighting Logo"
+              width={180}
+              height={48}
+              priority
+              sizes="(max-width: 768px) 128px, 180px"
+              className="h-10 w-auto md:h-12 object-contain"
+              onError={() => {
+                // try alternative path once, then fallback to text
+                if (logoSrc !== '/images/mainLogo.jpeg') setLogoSrc('/images/mainLogo.jpeg');
+                else setLogoError(true);
+              }}
+            />
+          ) : (
+            <span className="text-lg md:text-xl font-semibold text-red-600">Western Lighting</span>
+          )}
         </Link>
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-6">
-          {links.map(link => (
+          {links.map((link) => (
             <Link
               key={link.name}
               href={link.href}
@@ -52,15 +74,14 @@ export default function Header() {
               </span>
             )}
           </Link>
-
         </div>
 
         {/* Mobile right-side buttons */}
-         <div className="md:hidden flex items-center gap-4">
+        <div className="md:hidden flex items-center gap-4">
           <Link href="/cart" className="relative text-gray-700 hover:text-red-600" aria-label="Cart">
             <ShoppingCart size={24} />
             {itemCount > 0 && (
-              <span className="absolute -top-1 -right-1 text-xs bg-red-600 text-white rounded-full h-4 w-4 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 text-[10px] bg-red-600 text-white rounded-full h-4 w-4 flex items-center justify-center">
                 {itemCount}
               </span>
             )}
@@ -90,7 +111,7 @@ export default function Header() {
         }`}
       >
         <div className="h-full w-full">
-          {/* Header row with logo and close button */}
+          {/* Sidebar header */}
           <div className="flex items-center justify-between px-4 h-16 border-b border-gray-300">
             <span className="text-lg font-semibold text-red-600">Western Lighting</span>
             <button
@@ -112,7 +133,7 @@ export default function Header() {
 
           {/* Nav links */}
           <nav className="flex flex-col p-4 space-y-4">
-            {links.map(link => (
+            {links.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}

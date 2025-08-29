@@ -4,7 +4,6 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
-  // ✅ Add this block for image domains
   images: {
     domains: ["images.unsplash.com"],
   },
